@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karim.ia - المنصة الذكية المتكاملة</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e1e7fe',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#0f172a',
+                        },
+                        neonCyan: '#00f2fe',
+                        neonPurple: '#9d4edd'
+                    },
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #090d16;
+            color: #f1f5f9;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-modal {
+            background: rgba(10, 15, 29, 0.92);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        .neon-glow-purple {
+            box-shadow: 0 0 25px rgba(157, 78, 221, 0.35);
+        }
+        .neon-glow-cyan {
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.35);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between custom-scrollbar bg-[#090d16] text-slate-100 overflow-x-hidden">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-800 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3 space-x-reverse cursor-pointer" onclick="switchTab('chat')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-400 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30">
+                    K
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+                        Karim.ia
+                    </h1>
+                    <p class="text-[10px] text-slate-400">مساعد الذكاء الاصطناعي الفائق</p>
+                </div>
+            </div>
+
+            <!-- User Status & Actions -->
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <!-- User Balance Badge -->
+                <div id="userBalanceBadge" class="hidden items-center bg-slate-800/80 border border-slate-700/80 px-3 py-1.5 rounded-full text-xs font-semibold">
+                    <i class="fa-solid fa-bolt text-yellow-400 ml-1.5"></i>
+                    <span>الرصيد المتبقي: </span>
+                    <span id="opsCount" class="text-cyan-400 font-bold mr-1">3</span>
+                    <span class="text-slate-400 text-[10px] mr-1">عملیات</span>
+                </div>
+
+                <!-- Admin Button -->
+                <button onclick="openAdminModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center">
+                    <i class="fa-solid fa-user-shield ml-1.5 text-indigo-400"></i>
+                    <span>الأدمن</span>
+                </button>
+
+                <!-- Auth Buttons -->
+                <div id="authNavButtons">
+                    <button onclick="openAuthModal('login')" class="text-xs bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold px-4 py-2 rounded-lg transition shadow-md shadow-indigo-600/20">
+                        تسجيل الدخول
+                    </button>
+                </div>
+
+                <!-- User Profile Dropdown Button -->
+                <div id="userProfileNav" class="hidden relative">
+                    <button onclick="toggleUserMenu()" class="w-9 h-9 rounded-full bg-slate-700 border border-indigo-500/50 flex items-center justify-center text-indigo-300 font-bold text-sm">
+                        <span id="userAvatarChar">U</span>
+                    </button>
+                    <!-- User Dropdown Menu -->
+                    <div id="userMenuDropdown" class="hidden absolute left-0 mt-2 w-48 glass-panel rounded-xl shadow-2xl py-2 z-50 border border-slate-700">
+                        <div class="px-4 py-2 border-b border-slate-800">
+                            <p class="text-xs text-slate-400">مرحباً بك</p>
+                            <p id="userEmailDisplay" class="text-xs font-bold text-slate-200 truncate"></p>
+                        </div>
+                        <button onclick="logout()" class="w-full text-right px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 transition flex items-center">
+                            <i class="fa-solid fa-right-from-bracket ml-2"></i> تسجيل الخروج
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="lg:col-span-3 flex flex-col gap-3">
+            <div class="glass-panel p-4 rounded-2xl flex flex-col gap-2">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 px-2">الخدمات الأساسية</p>
+                
+                <button id="tab-chat" onclick="switchTab('chat')" class="nav-tab active flex items-center p-3 rounded-xl bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 font-semibold text-sm transition">
+                    <i class="fa-solid fa-robot text-lg ml-3 text-cyan-400"></i>
+                    <span>المساعد الذكي (Google)</span>
+                </button>
+
+                <button id="tab-image" onclick="switchTab('image')" class="nav-tab flex items-center p-3 rounded-xl hover:bg-slate-800/60 text-slate-300 font-semibold text-sm transition">
+                    <i class="fa-solid fa-wand-magic-sparkles text-lg ml-3 text-purple-400"></i>
+                    <span>صناعة الصور الفنية</span>
+                </button>
+
+                <button id="tab-app" onclick="switchTab('app')" class="nav-tab flex items-center p-3 rounded-xl hover:bg-slate-800/60 text-slate-300 font-semibold text-sm transition">
+                    <i class="fa-solid fa-code text-lg ml-3 text-emerald-400"></i>
+                    <span>صناعة التطبيقات والمواقع</span>
+                </button>
+
+                <button id="tab-study" onclick="switchTab('study')" class="nav-tab flex items-center p-3 rounded-xl hover:bg-slate-800/60 text-slate-300 font-semibold text-sm transition">
+                    <i class="fa-solid fa-graduation-cap text-lg ml-3 text-amber-400"></i>
+                    <span>المساعدة في الدروس</span>
+                </button>
+            </div>
+
+            <!-- Subscription Upgrade Card Banner -->
+            <div class="glass-panel p-4 rounded-2xl border border-purple-500/20 bg-gradient-to-b from-indigo-950/40 to-slate-900/60">
+                <div class="flex items-center space-x-2 space-x-reverse mb-2">
+                    <span class="p-2 rounded-lg bg-purple-500/20 text-purple-300"><i class="fa-solid fa-crown text-amber-400"></i></span>
+                    <h3 class="font-bold text-sm text-slate-100">الاشتراك الشهر الاحترافي</h3>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed mb-3">
+                    احصل على استخدام غير محدود لجميع خدمات Karim.ia بـ <strong class="text-cyan-300">1500.00 دج / شهر</strong> فقط.
+                </p>
+                <button onclick="openWhatsAppUpgrade('طلب اشتراك جديد')" class="w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-900/30">
+                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                    <span>تفعيل عبر واتساب</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Content Views Container -->
+        <section class="lg:col-span-9 flex flex-col h-[calc(100vh-140px)] min-h-[550px]">
+
+            <!-- 1. AI Chat Assistant View -->
+            <div id="view-chat" class="tab-view flex-1 glass-panel rounded-2xl flex flex-col overflow-hidden">
+                <!-- Chat Header -->
+                <div class="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span class="font-bold text-sm text-slate-200">المساعد التفاعلي الذكي</span>
+                    </div>
+                    <button onclick="clearChat('chat')" class="text-xs text-slate-400 hover:text-slate-200"><i class="fa-solid fa-trash ml-1"></i> مسح السجل</button>
+                </div>
+                <!-- Chat Stream Area -->
+                <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-4 custom-scrollbar">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold">K</div>
+                        <div class="bg-slate-800/90 p-3.5 rounded-2xl rounded-tr-none text-xs leading-relaxed max-w-[85%] border border-slate-700/60">
+                            مرحباً بك! أنا **Karim.ia** مساعدك التفاعلي المدعوم بأحدث تقنيات قوقل للذكاء الاصطناعي. كيف يمكنني مساعدتك اليوم؟
+                        </div>
+                    </div>
+                </div>
+                <!-- Input Box -->
+                <div class="p-3 border-t border-slate-800 bg-slate-900/60">
+                    <form onsubmit="handleChatSubmit(event)" class="flex gap-2">
+                        <input type="text" id="chatInput" placeholder="اكتب سؤالك أو طلبك هنا..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-indigo-500 text-slate-100 placeholder-slate-500">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                            <span>إرسال</span>
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 2. AI Image Generator View -->
+            <div id="view-image" class="tab-view hidden flex-1 glass-panel rounded-2xl p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-purple-300 flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> صانع الصور الذكي
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">اكتب وصفاً مفصلاً باللغة العربية أو الإنجليزية لتوليد صورة إبداعية بجودة عالية.</p>
+                </div>
+
+                <div class="flex flex-col gap-3 mb-6">
+                    <textarea id="imagePrompt" rows="3" placeholder="مثال: سيارة مستقبلية رياضية تسير في شوارع مدينة خيالية مضاءة بالنيون ليلاً، بدقة 4k وتفاصيل مذهلة..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs focus:outline-none focus:border-purple-500 text-slate-100 placeholder-slate-500 resize-none"></textarea>
+                    
+                    <button onclick="generateImage()" class="self-end bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-purple-600/30">
+                        <i class="fa-solid fa-palette"></i>
+                        <span>توليد الصورة الان</span>
+                    </button>
+                </div>
+
+                <!-- Generated Image Output Container -->
+                <div class="flex-1 bg-slate-950/80 rounded-2xl border border-slate-800 flex flex-col items-center justify-center p-4 relative min-h-[280px]">
+                    <div id="imageLoading" class="hidden flex-col items-center gap-3">
+                        <div class="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p class="text-xs text-purple-300 animate-pulse">جاري الرسم ومعالجة الصورة بذكاء...</p>
+                    </div>
+                    <div id="imagePlaceholder" class="text-center p-6 text-slate-600">
+                        <i class="fa-regular fa-image text-5xl mb-2"></i>
+                        <p class="text-xs">ستظهر الصورة المبتكرة هنا بعد الطلب</p>
+                    </div>
+                    <img id="generatedImg" src="" alt="AI Output" class="hidden max-h-[380px] rounded-xl object-contain shadow-2xl border border-purple-500/30">
+                    <a id="downloadImgBtn" href="#" download="karim-ia-image.png" class="hidden mt-3 text-xs bg-slate-800 hover:bg-slate-700 text-cyan-300 px-4 py-2 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> تحميل الصورة
+                    </a>
+                </div>
+            </div>
+
+            <!-- 3. App Builder View -->
+            <div id="view-app" class="tab-view hidden flex-1 glass-panel rounded-2xl p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-emerald-300 flex items-center gap-2">
+                        <i class="fa-solid fa-code"></i> استوديو صناعة التطبيقات والمواقع
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">اطلب إنشاء تطبيق ويب أو حاسبة أو أداة تفاعلية، وسيقوم الذكاء الاصطناعي ببنائها فوراً بمعاينة حية.</p>
+                </div>
+
+                <div class="flex flex-col gap-3 mb-4">
+                    <input type="text" id="appPrompt" placeholder="مثال: قم بإنشاء تطبيق حاسبة نسبة مئوية بستايل نيون وجذاب..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-emerald-500 text-slate-100 placeholder-slate-500">
+                    <button onclick="generateAppCode()" class="self-end bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+                        <i class="fa-solid fa-laptop-code"></i>
+                        <span>بناء التطبيق</span>
+                    </button>
+                </div>
+
+                <!-- Code / Preview Split Panel -->
+                <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-[300px]">
+                    <!-- Code Tab -->
+                    <div class="bg-slate-950 rounded-xl border border-slate-800 p-3 flex flex-col">
+                        <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+                            <span class="text-[11px] text-slate-400 font-mono"><i class="fa-solid fa-terminal ml-1"></i> HTML/JS Code</span>
+                            <button onclick="copyAppCode()" class="text-[11px] text-indigo-400 hover:text-indigo-300"><i class="fa-regular fa-copy ml-1"></i> نسخ الكود</button>
+                        </div>
+                        <textarea id="appCodeOutput" readonly class="w-full flex-1 bg-transparent font-mono text-[11px] text-emerald-400 focus:outline-none resize-none custom-scrollbar" placeholder="سيظهر الكود المولد هنا..."></textarea>
+                    </div>
+                    <!-- Live Preview -->
+                    <div class="bg-slate-950 rounded-xl border border-slate-800 p-1 flex flex-col">
+                        <div class="bg-slate-900 px-3 py-1.5 rounded-t-lg border-b border-slate-800 flex items-center justify-between">
+                            <span class="text-[11px] text-slate-400"><i class="fa-solid fa-eye ml-1"></i> المعاينة الحية المباشرة</span>
+                        </div>
+                        <iframe id="appPreviewFrame" class="w-full flex-1 rounded-b-lg bg-white"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Study Helper View -->
+            <div id="view-study" class="tab-view hidden flex-1 glass-panel rounded-2xl p-5 flex flex-col overflow-y-auto custom-scrollbar">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-amber-300 flex items-center gap-2">
+                        <i class="fa-solid fa-graduation-cap"></i> المساعد المدرسي والجامعي
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">حل المسائل الرياضية، تلخيص الدروس، شرح مفاهيم الفيزياء أو العلوم والمزيد.</p>
+                </div>
+
+                <div class="flex flex-col gap-3 mb-4">
+                    <textarea id="studyPrompt" rows="3" placeholder="ضع نص التمرين، الموضوع، أو الدرس المطلوب شرحه بالتفصيل..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs focus:outline-none focus:border-amber-500 text-slate-100 placeholder-slate-500 resize-none"></textarea>
+                    <button onclick="generateStudyHelp()" class="self-end bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-amber-600/20">
+                        <i class="fa-solid fa-brain"></i>
+                        <span>الشرح والحل المفصل</span>
+                    </button>
+                </div>
+
+                <div id="studyResponse" class="flex-1 bg-slate-950/80 rounded-2xl border border-slate-800 p-4 text-xs leading-relaxed text-slate-200 overflow-y-auto custom-scrollbar whitespace-pre-wrap">
+                    النتيجة والشرح الأكاديمي سيظهر هنا بخطوات واضحة...
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Out of Balance / Upgrade Modal -->
+    <div id="outOfBalanceModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="glass-modal max-w-md w-full rounded-2xl p-6 text-center shadow-2xl border border-rose-500/30">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 text-2xl">
+                <i class="fa-solid fa-battery-empty animate-bounce"></i>
+            </div>
+            <h3 class="text-xl font-extrabold text-white mb-2">تم نفاد رصيدك المجاني!</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-6">
+                لقد استنفذت الـ 3 عمليات المجانية المتاحة لك. يرجى التواصل عبر الواتساب لتفعيل اشتراكك الشهر بـ <strong class="text-amber-300">1500.00 دج</strong>.
+            </p>
+            <div class="flex flex-col gap-3">
+                <button onclick="openWhatsAppUpgrade('نفد رصيدي أرغب في تفعيل الاشتراك بـ 1500 دج')" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/30">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>مراسلة عبر واتساب (0670800009)</span>
+                </button>
+                <button onclick="closeModal('outOfBalanceModal')" class="py-2.5 text-xs text-slate-400 hover:text-white transition">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login / Signup Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="glass-modal max-w-md w-full rounded-2xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="authModalTitle" class="text-lg font-bold text-white">تسجيل الدخول</h3>
+                <button onclick="closeModal('authModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="handleAuthSubmit(event)" class="flex flex-col gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">البريد الإلكتروني</label>
+                    <input type="email" id="authEmail" required placeholder="example@domain.com" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-indigo-500 text-slate-100">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">كلمة السر</label>
+                    <input type="password" id="authPassword" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-indigo-500 text-slate-100">
+                </div>
+
+                <input type="hidden" id="authMode" value="login">
+
+                <button type="submit" id="authSubmitBtn" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-indigo-600/30 mt-2">
+                    دخول
+                </button>
+            </form>
+
+            <div class="mt-4 text-center">
+                <button id="toggleAuthModeBtn" onclick="toggleAuthMode()" class="text-xs text-indigo-400 hover:underline">
+                    ليس لديك حساب؟ أنشئ حساباً جديداً أحصل على 3 عمليات مجانية
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-black/85 backdrop-blur-lg hidden items-center justify-center p-4 z-50">
+        <div class="glass-modal max-w-2xl w-full rounded-2xl p-6 shadow-2xl border border-indigo-500/30 max-h-[90vh] flex flex-col">
+            
+            <!-- Admin Header -->
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <span class="p-2 rounded-lg bg-indigo-500/20 text-indigo-400"><i class="fa-solid fa-user-shield"></i></span>
+                    <div>
+                        <h3 class="text-base font-extrabold text-white">لوحة تحكم الأدمن</h3>
+                        <!-- SECURITY / PRIVACY REQUIREMENT: Admin phone & pass masked -->
+                        <p class="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                            المسؤول: <span id="adminMaskedPhone" class="font-mono text-slate-300">06••••••09</span>
+                            <span class="text-slate-600">|</span>
+                            الحالة: <span class="text-emerald-400 font-bold">مشفر ومحمي</span>
+                        </p>
+                    </div>
+                </div>
+                <button onclick="closeModal('adminModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- Admin Login Stage -->
+            <div id="adminLoginSection" class="py-4">
+                <form onsubmit="handleAdminLogin(event)" class="max-w-sm mx-auto flex flex-col gap-4">
+                    <p class="text-xs text-slate-400 text-center">يرجى إدخال بيانات الاعتماد للوصول إلى بيانات المشتركين:</p>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">رقم الهاتف</label>
+                        <!-- Secret inputs -->
+                        <input type="text" id="adminPhoneInput" placeholder="أدخل رقم الهاتف" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-indigo-500 text-slate-100">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">كلمة السر</label>
+                        <input type="password" id="adminPassInput" placeholder="••••" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-indigo-500 text-slate-100">
+                    </div>
+                    <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition">
+                        تأكيد الدخول للأدمن
+                    </button>
+                </form>
+            </div>
+
+            <!-- Admin Management Section (Hidden until valid admin password) -->
+            <div id="adminDashboardSection" class="hidden flex-1 flex flex-col overflow-hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-xs font-bold text-slate-300">قائمة المستخدمين والاشتراكات</h4>
+                    <button onclick="loadUsersFromRTDB()" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-cyan-300 px-3 py-1 rounded-lg transition">
+                        <i class="fa-solid fa-rotate ml-1"></i> تحديث
+                    </button>
+                </div>
+
+                <!-- Users Table -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar border border-slate-800 rounded-xl bg-slate-950">
+                    <table class="w-full text-right text-xs text-slate-300">
+                        <thead class="bg-slate-900 text-slate-400 sticky top-0 border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">البريد الإلكتروني</th>
+                                <th class="p-3">الرصيد/المحاولات</th>
+                                <th class="p-3">الحالة</th>
+                                <th class="p-3 text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersList">
+                            <!-- Populated via Firebase RTDB -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="fixed bottom-5 left-5 z-50 glass-panel border border-indigo-500/40 text-slate-100 px-4 py-3 rounded-xl text-xs hidden items-center gap-2 shadow-2xl">
+        <i id="toastIcon" class="fa-solid fa-circle-info text-cyan-400"></i>
+        <span id="toastText">إشعار</span>
+    </div>
+
+    <!-- Application Script Logic -->
+    <script>
+        // CONFIG & STATE
+        const RTDB_URL = "https://laboratoire-13277-default-rtdb.firebaseio.com/";
+        const GEMINI_API_KEY = ""; // Provided runtime by environment
+        
+        // ADMIN CONFIDENTIAL CREDS
+        const ADMIN_PHONE_SECRET = "0670800009";
+        const ADMIN_PASS_SECRET = "2026";
+
+        let currentUser = null; // { email, uid, opsLeft, isSubscribed }
+        let currentTab = 'chat';
+
+        // Initialize on DOM load
+        window.onload = function() {
+            checkSavedUserSession();
+            switchTab('chat');
+        };
+
+        // UI TAB SWITCHING
+        function switchTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(el => {
+                el.classList.remove('active', 'bg-indigo-600/20', 'text-indigo-300', 'border', 'border-indigo-500/30');
+                el.classList.add('hover:bg-slate-800/60', 'text-slate-300');
+            });
+
+            const activeTabBtn = document.getElementById(`tab-${tabName}`);
+            const activeView = document.getElementById(`view-${tabName}`);
+
+            if (activeTabBtn && activeView) {
+                activeView.classList.remove('hidden');
+                activeTabBtn.classList.add('active', 'bg-indigo-600/20', 'text-indigo-300', 'border', 'border-indigo-500/30');
+            }
+        }
+
+        // USER BALANCE DECREMENT CHECK
+        async function consumeOperation() {
+            if (!currentUser) {
+                openAuthModal('login');
+                showToast("يرجى تسجيل الدخول أولاً لاستخدام الخدمة", "warning");
+                return false;
+            }
+
+            if (currentUser.opsLeft <= 0 && !currentUser.isSubscribed) {
+                openModal('outOfBalanceModal');
+                return false;
+            }
+
+            if (!currentUser.isSubscribed) {
+                currentUser.opsLeft -= 1;
+                updateUserInRTDB(currentUser);
+                updateUIState();
+            }
+            return true;
+        }
+
+        // FIREBASE RTDB API HELPERS
+        async function saveUserToRTDB(userObj) {
+            const key = btoa(userObj.email).replace(/=/g, "");
+            try {
+                await fetch(`${RTDB_URL}/users/${key}.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userObj)
+                });
+            } catch (err) {
+                console.error("RTDB Error:", err);
+            }
+        }
+
+        async function fetchUserFromRTDB(email) {
+            const key = btoa(email).replace(/=/g, "");
+            try {
+                const res = await fetch(`${RTDB_URL}/users/${key}.json`);
+                if (res.ok) {
+                    return await res.json();
+                }
+            } catch (err) {
+                console.error("Fetch Error:", err);
+            }
+            return null;
+        }
+
+        async function updateUserInRTDB(userObj) {
+            await saveUserToRTDB(userObj);
+        }
+
+        // AUTH SYSTEM LOGIC
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value.trim().toLowerCase();
+            const pass = document.getElementById('authPassword').value.trim();
+            const mode = document.getElementById('authMode').value;
+
+            if (!email || !pass) return;
+
+            if (mode === 'signup') {
+                let existing = await fetchUserFromRTDB(email);
+                if (existing) {
+                    showToast("هذا البريد مسجل بالفعل، اختر تسجيل الدخول", "error");
+                    return;
+                }
+                // New user registration gets 3 operations
+                currentUser = {
+                    email: email,
+                    pass: pass,
+                    opsLeft: 3,
+                    isSubscribed: false,
+                    createdAt: new Date().toISOString()
+                };
+                await saveUserToRTDB(currentUser);
+                showToast("تم إنشاء حسابك بنجاح وحصلت على 3 عمليات مجانية!", "success");
+            } else {
+                let user = await fetchUserFromRTDB(email);
+                if (!user || user.pass !== pass) {
+                    showToast("البريد أو كلمة السر غير صحيحة", "error");
+                    return;
+                }
+                currentUser = user;
+                showToast("تم تسجيل الدخول بنجاح!", "success");
+            }
+
+            localStorage.setItem('karim_user_email', currentUser.email);
+            updateUIState();
+            closeModal('authModal');
+        }
+
+        function checkSavedUserSession() {
+            const savedEmail = localStorage.getItem('karim_user_email');
+            if (savedEmail) {
+                fetchUserFromRTDB(savedEmail).then(user => {
+                    if (user) {
+                        currentUser = user;
+                        updateUIState();
+                    }
+                });
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('karim_user_email');
+            updateUIState();
+            showToast("تم تسجيل الخروج", "info");
+        }
+
+        function updateUIState() {
+            const balanceBadge = document.getElementById('userBalanceBadge');
+            const opsCount = document.getElementById('opsCount');
+            const authNavBtns = document.getElementById('authNavButtons');
+            const userProfileNav = document.getElementById('userProfileNav');
+            const userEmailDisplay = document.getElementById('userEmailDisplay');
+            const userAvatarChar = document.getElementById('userAvatarChar');
+
+            if (currentUser) {
+                balanceBadge.classList.remove('hidden');
+                balanceBadge.classList.add('flex');
+                opsCount.innerText = currentUser.isSubscribed ? "غير محدود" : currentUser.opsLeft;
+                
+                authNavBtns.classList.add('hidden');
+                userProfileNav.classList.remove('hidden');
+                userEmailDisplay.innerText = currentUser.email;
+                userAvatarChar.innerText = currentUser.email.charAt(0).toUpperCase();
+            } else {
+                balanceBadge.classList.add('hidden');
+                authNavBtns.classList.remove('hidden');
+                userProfileNav.classList.add('hidden');
+            }
+        }
+
+        // GEMINI AI INTEGRATION API CALLS
+        async function callGemini(prompt, systemInstruction = "") {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }]
+            };
+
+            if (systemInstruction) {
+                payload.systemInstruction = { parts: [{ text: systemInstruction }] };
+            }
+
+            let retries = 0;
+            while (retries < 3) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "اعتذر، لم أتمكن من استخراج الإجابة.";
+                } catch (err) {
+                    retries++;
+                    await new Promise(r => setTimeout(r, Math.pow(2, retries) * 1000));
+                }
+            }
+            return "حدث خطأ بالاتصال بالذكاء الاصطناعي، يرجى المحاولة لاحقاً.";
+        }
+
+        // 1. AI CHAT ASSISTANT
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const inputEl = document.getElementById('chatInput');
+            const prompt = inputEl.value.trim();
+            if (!prompt) return;
+
+            const allowed = await consumeOperation();
+            if (!allowed) return;
+
+            inputEl.value = '';
+            appendChatMessage("user", prompt);
+
+            const systemPrompt = "أنت Karim.ia، مساعد ذكاء اصطناعي احترافي وودود ينطق باللغة العربية بأسلوب راقٍ وواضح. قم بتقديم إجابات غنية ومفيدة للطلاب والمستخدمين.";
+            
+            const typingId = appendChatMessage("ai", "جاري التفكير والتوليد...");
+            const reply = await callGemini(prompt, systemPrompt);
+            updateChatMessage(typingId, reply);
+        }
+
+        function appendChatMessage(role, text) {
+            const chatBox = document.getElementById('chatMessages');
+            const msgId = 'msg-' + Date.now();
+            const isUser = role === 'user';
+
+            const msgHTML = `
+                <div id="${msgId}" class="flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}">
+                    <div class="w-8 h-8 rounded-full ${isUser ? 'bg-purple-600' : 'bg-gradient-to-tr from-indigo-500 to-purple-600'} flex items-center justify-center text-xs font-bold">
+                        ${isUser ? 'U' : 'K'}
+                    </div>
+                    <div class="${isUser ? 'bg-indigo-600/90 text-white rounded-tl-none' : 'bg-slate-800/90 text-slate-100 rounded-tr-none border border-slate-700/60'} p-3.5 rounded-2xl text-xs leading-relaxed max-w-[85%] whitespace-pre-wrap">
+                        ${text}
+                    </div>
+                </div>
+            `;
+            chatBox.innerHTML += msgHTML;
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return msgId;
+        }
+
+        function updateChatMessage(msgId, newText) {
+            const msgEl = document.getElementById(msgId);
+            if (msgEl) {
+                const textContainer = msgEl.querySelector('div:last-child');
+                textContainer.innerText = newText;
+            }
+        }
+
+        function clearChat(tab) {
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold">K</div>
+                    <div class="bg-slate-800/90 p-3.5 rounded-2xl rounded-tr-none text-xs leading-relaxed max-w-[85%] border border-slate-700/60">
+                        تم مسح المحادثة. كيف يمكنني مساعدتك الآن؟
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2. AI IMAGE GENERATOR
+        async function generateImage() {
+            const prompt = document.getElementById('imagePrompt').value.trim();
+            if (!prompt) {
+                showToast("يرجى كتابة وصف الصورة أولاً", "warning");
+                return;
+            }
+
+            const allowed = await consumeOperation();
+            if (!allowed) return;
+
+            const loader = document.getElementById('imageLoading');
+            const placeholder = document.getElementById('imagePlaceholder');
+            const imgEl = document.getElementById('generatedImg');
+            const downloadBtn = document.getElementById('downloadImgBtn');
+
+            placeholder.classList.add('hidden');
+            imgEl.classList.add('hidden');
+            downloadBtn.classList.add('hidden');
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+
+            try {
+                // Using Flash Image model logic via Pollinations or Gemini Fallback
+                const encodedPrompt = encodeURIComponent(prompt + " ultra detailed 8k cinematic lighting");
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=600&nologo=true`;
+                
+                // Preload image
+                const img = new Image();
+                img.onload = () => {
+                    loader.classList.add('hidden');
+                    loader.classList.remove('flex');
+                    imgEl.src = imageUrl;
+                    imgEl.classList.remove('hidden');
+                    downloadBtn.href = imageUrl;
+                    downloadBtn.classList.remove('hidden');
+                };
+                img.src = imageUrl;
+            } catch (err) {
+                loader.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                showToast("تعذر توليد الصورة، أعد المحاولة", "error");
+            }
+        }
+
+        // 3. APP BUILDER STUDIO
+        async function generateAppCode() {
+            const prompt = document.getElementById('appPrompt').value.trim();
+            if (!prompt) {
+                showToast("اكتب الفكرة أو التطبيق المطلوب إنشاؤه", "warning");
+                return;
+            }
+
+            const allowed = await consumeOperation();
+            if (!allowed) return;
+
+            const sysInstruction = "أنت مهندس برمجيات محترف. قم بإنشاء تطبيق HTML/CSS/JS كامل في ملف واحد فقط بدون أي كلام خارجي. ضع كود HTML نقي جاهز للتشغيل مباشرة في iframe.";
+            
+            showToast("جاري إنشاء كود التطبيق...", "info");
+            const generatedCode = await callGemini(`أنشئ تطبيق ويب كامل ومصمم بـ Tailwind CSS بالمتطلبات التالية: ${prompt}`, sysInstruction);
+            
+            // Clean markdown blocks if present
+            const cleanCode = generatedCode.replace(/```html/g, '').replace(/```/g, '').trim();
+
+            document.getElementById('appCodeOutput').value = cleanCode;
+            
+            // Render inside iframe preview
+            const iframe = document.getElementById('appPreviewFrame');
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write(cleanCode);
+            iframeDoc.close();
+        }
+
+        function copyAppCode() {
+            const code = document.getElementById('appCodeOutput').value;
+            if (!code) return;
+            navigator.clipboard.writeText(code);
+            showToast("تم نسخ الكود الحافظة", "success");
+        }
+
+        // 4. STUDY HELPER
+        async function generateStudyHelp() {
+            const prompt = document.getElementById('studyPrompt').value.trim();
+            if (!prompt) {
+                showToast("أدخل نص التمرين أو المفاهيم المراد شرحها", "warning");
+                return;
+            }
+
+            const allowed = await consumeOperation();
+            if (!allowed) return;
+
+            const resContainer = document.getElementById('studyResponse');
+            resContainer.innerText = "جاري التحليل الأكاديمي وإعداد الشرح المفصل...";
+
+            const sysInstruction = "أنت أستاذ ومدرس متكافئ في الرياضيات والفيزياء والعلوم. اقدم حلولاً نموذجية، مفصلة وواضحة جداً بالخطوات للطلاب.";
+            const response = await callGemini(prompt, sysInstruction);
+            resContainer.innerText = response;
+        }
+
+        // WHATSAPP REDIRECT HELPER
+        function openWhatsAppUpgrade(customMsg) {
+            const phone = "213670800009";
+            const text = encodeURIComponent(`مرحباً Karim.ia ، ${customMsg}`);
+            window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+        }
+
+        // ADMIN PANEL FUNCTIONALITY
+        function openAdminModal() {
+            openModal('adminModal');
+            document.getElementById('adminLoginSection').classList.remove('hidden');
+            document.getElementById('adminDashboardSection').classList.add('hidden');
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const phone = document.getElementById('adminPhoneInput').value.trim();
+            const pass = document.getElementById('adminPassInput').value.trim();
+
+            if (phone === ADMIN_PHONE_SECRET && pass === ADMIN_PASS_SECRET) {
+                document.getElementById('adminLoginSection').classList.add('hidden');
+                document.getElementById('adminDashboardSection').classList.remove('hidden');
+                loadUsersFromRTDB();
+                showToast("مرحباً بالأدمن، تم التحقق من هويتك", "success");
+            } else {
+                showToast("بيانات الأدمن غير صحيحة", "error");
+            }
+        }
+
+        async function loadUsersFromRTDB() {
+            const tbody = document.getElementById('adminUsersList');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">جاري تحميل البيانات...</td></tr>';
+
+            try {
+                const res = await fetch(`${RTDB_URL}/users.json`);
+                const data = await res.json();
+                
+                tbody.innerHTML = '';
+                if (!data) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">لا يوجد مستخدمون مسجلون بعد.</td></tr>';
+                    return;
+                }
+
+                Object.values(data).forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-slate-800 hover:bg-slate-900/50";
+                    tr.innerHTML = `
+                        <td class="p-3 font-mono text-xs">${u.email}</td>
+                        <td class="p-3">${u.isSubscribed ? '<span class="text-amber-400 font-bold">غير محدود</span>' : u.opsLeft + ' عمليات'}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-0.5 rounded text-[10px] ${u.isSubscribed ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
+                                ${u.isSubscribed ? 'مشترك نشط' : 'تجريبي'}
+                            </span>
+                        </td>
+                        <td class="p-3 text-center">
+                            <button onclick="adminToggleSub('${u.email}', ${!u.isSubscribed})" class="px-2.5 py-1 text-[11px] rounded bg-indigo-600 hover:bg-indigo-500 text-white transition ml-1">
+                                ${u.isSubscribed ? 'إلغاء الاشتراك' : 'تفعيل شهر (1500دج)'}
+                            </button>
+                            <button onclick="adminAddOps('${u.email}')" class="px-2 py-1 text-[11px] rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 transition">
+                                +3 محاولات
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-rose-500">حدث خطأ أثناء جلب البيانات.</td></tr>';
+            }
+        }
+
+        async function adminToggleSub(email, subStatus) {
+            let user = await fetchUserFromRTDB(email);
+            if (user) {
+                user.isSubscribed = subStatus;
+                await updateUserInRTDB(user);
+                showToast(`تم ${subStatus ? 'تفعيل' : 'إلغاء'} الاشتراك بـ 1500 دج للمستخدم`, "success");
+                loadUsersFromRTDB();
+            }
+        }
+
+        async function adminAddOps(email) {
+            let user = await fetchUserFromRTDB(email);
+            if (user) {
+                user.opsLeft += 3;
+                await updateUserInRTDB(user);
+                showToast("تم إضافة 3 محاولات بنجاح", "success");
+                loadUsersFromRTDB();
+            }
+        }
+
+        // AUTH MODAL LOGIC
+        function openAuthModal(mode = 'login') {
+            document.getElementById('authMode').value = mode;
+            document.getElementById('authModalTitle').innerText = mode === 'login' ? 'تسجيل الدخول' : 'حساب جديد (3 عمليات مجانية)';
+            document.getElementById('authSubmitBtn').innerText = mode === 'login' ? 'دخول' : 'إنشاء حساب جديد';
+            document.getElementById('toggleAuthModeBtn').innerText = mode === 'login' ? 'ليس لديك حساب؟ أنشئ حساباً جديداً أحصل على 3 عمليات مجانية' : 'لديك حساب بالفعل؟ تسجيل الدخول';
+            openModal('authModal');
+        }
+
+        function toggleAuthMode() {
+            const currentMode = document.getElementById('authMode').value;
+            openAuthModal(currentMode === 'login' ? 'signup' : 'login');
+        }
+
+        function openModal(id) {
+            const m = document.getElementById(id);
+            if (m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            }
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            if (m) {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenuDropdown');
+            menu.classList.toggle('hidden');
+        }
+
+        // TOAST NOTIFICATIONS
+        function showToast(msg, type = "info") {
+            const toast = document.getElementById('toast');
+            const text = document.getElementById('toastText');
+            const icon = document.getElementById('toastIcon');
+
+            text.innerText = msg;
+            if (type === 'error') icon.className = "fa-solid fa-circle-xmark text-rose-400";
+            else if (type === 'success') icon.className = "fa-solid fa-circle-check text-emerald-400";
+            else if (type === 'warning') icon.className = "fa-solid fa-triangle-exclamation text-amber-400";
+            else icon.className = "fa-solid fa-circle-info text-cyan-400";
+
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
